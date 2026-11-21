@@ -9,7 +9,7 @@
 html{color-scheme:dark}body{margin:0}
 /* Layout: one TV-safe stage. Left, a very large clock and date over drifting light. Right, a glass column with the task list and month. */
 :root {
-  --ink: #0a1d22;
+  --ink: #0b0806;
   --ink-2: #1a1633;
   --glow-teal: 47, 181, 168;
   --glow-rose: 196, 71, 125;
@@ -18,7 +18,7 @@ html{color-scheme:dark}body{margin:0}
   --text: #f6ecdc;
   --muted: #c8bba3;
   --faint: rgba(246, 236, 220, 0.14);
-  --panel: rgba(8, 26, 31, 0.55);
+  --panel: rgba(16, 10, 7, 0.58);
   --accent: #d9a441;
   --font-display: "Playfair Display", Georgia, "Times New Roman", serif;
   --font-body: "DM Sans", "Segoe UI", system-ui, sans-serif;
@@ -30,15 +30,83 @@ body {
   background: var(--ink);
   color: var(--text);
   font-family: var(--font-body);
-  font-size: clamp(16px, 1.35vw, 28px);
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
-  padding-block: clamp(16px, 3vw, 56px);
+  font-size: clamp(10px, min(1.35vw, 2.3vh), 28px);
+  padding-left: max(4vw, env(safe-area-inset-left, 0px));
+  padding-right: max(4vw, env(safe-area-inset-right, 0px));
+  padding-block: clamp(16px, 4.5vh, 56px);
   overflow-x: hidden;
 }
 #ambient { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; display: block; }
+#moon { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+#moon .beam { position: absolute; right: -6vw; top: -18vh; width: 46vw; height: 150vh; transform: rotate(-24deg); transform-origin: 50% 0; background: linear-gradient(180deg, rgba(170,195,255,0.2), rgba(170,195,255,0.04) 65%, transparent); animation: moonbreathe 11s ease-in-out infinite; }
+#moon .beam::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 48%, rgba(10,7,9,0.45) 49% 51%, transparent 52%), linear-gradient(0deg, transparent 52%, rgba(10,7,9,0.45) 53% 55%, transparent 56%); }
+#moon .mote { position: absolute; width: 3px; height: 3px; border-radius: 50%; background: rgba(215,228,255,0.85); opacity: 0; animation: motedrift var(--d) ease-in-out infinite; animation-delay: var(--w); }
+@keyframes moonbreathe { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+@keyframes motedrift { 0% { transform: translate(0, 0); opacity: 0; } 25% { opacity: 0.7; } 100% { transform: translate(3vw, -7vh); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { #moon .beam, #moon .mote { animation: none; } #moon .mote { display: none; } }
+
+/* Velvet: soft drapery folds, a slow sheen, fine grain and a vignette over the firelight */
+#velvet { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+#velvet .folds { position: absolute; inset: -2%; background:
+  repeating-linear-gradient(90deg, rgba(0,0,0,0.62) 0, rgba(70,10,26,0.12) 2.6vw, rgba(0,0,0,0.62) 5.6vw),
+  repeating-linear-gradient(90deg, rgba(0,0,0,0) 0, rgba(150,30,50,0.1) 4.1vw, rgba(0,0,0,0) 9.3vw),
+  linear-gradient(180deg, rgba(40,6,16,0.55), rgba(18,4,8,0.2) 60%, rgba(60,14,10,0.2)); }
+#velvet .sheen { position: absolute; inset: 0; background: linear-gradient(100deg, transparent 38%, rgba(255,190,150,0.09) 50%, transparent 62%); background-size: 260% 100%; animation: velvetpan 40s ease-in-out infinite alternate; mix-blend-mode: screen; }
+#velvet .grain { position: absolute; inset: 0; opacity: 0.16; mix-blend-mode: overlay; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+#velvet .vig { position: absolute; inset: 0; background: radial-gradient(120% 100% at 50% 55%, transparent 40%, rgba(0,0,0,0.7) 100%); }
+@keyframes velvetpan { from { background-position: 100% 0; } to { background-position: 0 0; } }
+@media (prefers-reduced-motion: reduce) { #velvet .sheen { animation: none; } }
+body .clock { background: linear-gradient(180deg, var(--c1, #fbebc4) 10%, var(--c2, #e3b967) 55%, var(--c3, #a9772a) 100%); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; filter: drop-shadow(0 4px 24px rgba(255,140,60,0.25)); }
+.clock .ampm { -webkit-text-fill-color: var(--accent); color: var(--accent); }
+.date { color: #f3dcc0; text-shadow: 0 2px 20px rgba(0,0,0,0.7); }
+body[data-look="velvet"] .panel { background: linear-gradient(165deg, rgba(92,16,36,0.55), rgba(18,5,9,0.82)); border-color: rgba(214,176,98,0.38); box-shadow: inset 0 0 0 5px rgba(8,2,4,0.5), inset 0 0 0 6px rgba(214,176,98,0.18), 0 24px 50px rgba(0,0,0,0.55); }
+body[data-look="velvet"] .app { background: repeating-linear-gradient(90deg, rgba(0,0,0,0.3) 0, rgba(0,0,0,0) 0.9em, rgba(0,0,0,0.3) 1.8em), linear-gradient(165deg, #8a2038 0%, #4d1022 55%, #240810 100%); border: 1px solid rgba(214,176,98,0.6); box-shadow: inset 0 1px 0 rgba(255,225,170,0.3), inset 0 -14px 24px rgba(0,0,0,0.45), 0 14px 30px rgba(0,0,0,0.5); }
+.app-form[hidden] { display: none; }
+body[data-look="velvet"] .app::after { content: ""; position: absolute; inset: 5px; border: 1px solid rgba(214,176,98,0.3); border-radius: 11px; z-index: 2; pointer-events: none; }
+body[data-look="velvet"] .app .nm { color: #f6e2bc; }
+
+/* Looks: each one sets its own clock colours, tile edges and which light layers show */
+body[data-look="velvet"] { --c1: #fbebc4; --c2: #e3b967; --c3: #a9772a; }
+body[data-look="ember"] { --c1: #ffe9c9; --c2: #f0a85a; --c3: #b5601f; }
+body[data-look="moon"] { --c1: #f4f7ff; --c2: #c3cfe6; --c3: #8e9cbc; }
+body[data-look="candle"] { --c1: #fff2d6; --c2: #f0c27a; --c3: #c08a3a; }
+body[data-look="blue"] { --c1: #f1f5ff; --c2: #b3c6ff; --c3: #7a8fe0; }
+#velvet, #moon, #embers, #candles { opacity: 0; transition: opacity 1.6s ease; }
+body[data-look="velvet"] #velvet { opacity: 1; }
+body[data-look="velvet"] #moon { opacity: 0.8; }
+body[data-look="moon"] #moon { opacity: 1; }
+body[data-look="moon"] #moon .beam { background: linear-gradient(180deg, rgba(185,205,255,0.34), rgba(185,205,255,0.07) 65%, transparent); }
+body[data-look="ember"] #embers { opacity: 1; }
+body[data-look="candle"] #candles { opacity: 1; }
+body[data-look="ember"] .app { border-color: rgba(255,140,50,0.34); box-shadow: inset 0 -2em 2.4em -1.6em rgba(255,110,30,0.4), 0 12px 26px rgba(0,0,0,0.4); }
+body[data-look="moon"] .app { border-color: rgba(200,215,240,0.26); }
+body[data-look="candle"] .app { border-color: rgba(255,214,150,0.3); }
+body[data-look="blue"] .app { border-color: rgba(150,180,255,0.3); }
+body[data-look="moon"] .panel, body[data-look="blue"] .panel { border-color: rgba(190,205,240,0.24); }
+body[data-look="ember"] .panel, body[data-look="candle"] .panel { border-color: rgba(217,164,65,0.3); }
+body.fire .app .liq { opacity: 0.45; }
+#embers, #candles { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+#embers .ember { position: absolute; bottom: -2vh; width: 5px; height: 5px; border-radius: 50%; background: #ffb25c; box-shadow: 0 0 12px 3px rgba(255,150,60,0.8); opacity: 0; animation: emberrise var(--d) linear infinite; animation-delay: var(--w); }
+@keyframes emberrise { 0% { transform: translate(0, 0) scale(1); opacity: 0; } 10% { opacity: 0.95; } 100% { transform: translate(var(--dx), -70vh) scale(0.3); opacity: 0; } }
+#candles .pillar { position: absolute; bottom: 2.4vh; border-radius: 4px; background: linear-gradient(90deg, #cbbf9f, #f3ead6 42%, #b3a687); box-shadow: 0 0 50px rgba(255,170,70,0.3); }
+#candles .pillar::before { content: ""; position: absolute; left: 50%; top: -2px; width: 2px; height: 9px; background: #2a1d10; transform: translateX(-50%); }
+#candles .flame { position: absolute; left: 50%; top: -2.6vw; width: 0.9vw; height: 2.1vw; transform-origin: 50% 90%; border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%; background: radial-gradient(ellipse at 50% 70%, #fff6c8 0, #ffb23a 55%, rgba(255,120,20,0) 100%); box-shadow: 0 0 30px 12px rgba(255,160,60,0.5); animation: flameflick 2.1s ease-in-out infinite alternate; animation-delay: var(--w); }
+@keyframes flameflick { 0% { transform: translateX(-50%) scale(1,1) rotate(-2deg); } 50% { transform: translateX(-50%) scale(0.9,1.12) rotate(2deg); } 100% { transform: translateX(-50%) scale(1.06,0.95) rotate(-1deg); } }
+@media (prefers-reduced-motion: reduce) { #embers .ember, #candles .flame { animation: none; } #embers .ember { display: none; } }
+#looks { position: fixed; top: 1.6vh; right: 2.2vw; z-index: 4; display: flex; gap: 0.4em; font-size: clamp(10px, 0.85vw, 16px); opacity: 0.35; transition: opacity 0.6s ease; }
+#looks:hover, #looks:focus-within { opacity: 1; }
+#looks button { font: inherit; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); background: rgba(10,6,6,0.55); border: 1px solid rgba(246,236,220,0.2); border-radius: 999px; padding: 0.5em 1em; cursor: pointer; }
+#looks button[aria-pressed="true"] { color: #2a1a05; background: linear-gradient(135deg, #f0d58a, #c8922f); border-color: transparent; }
+#looks button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.strip { display: flex; flex-direction: column; gap: 0.15em; padding: 0.9em 1.3em; border: 1px solid rgba(217,164,65,0.3); border-radius: 16px; background: rgba(14,8,8,0.55); color: var(--text); text-decoration: none; font-size: 1.1em; }
+.strip:hover, .strip:focus-visible { border-color: rgba(217,164,65,0.7); }
+.strip .k { font-size: 0.65em; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+.strip .v { font-family: var(--font-display); font-size: 1.35em; }
+.strip .h { font-size: 0.75em; color: var(--muted); }
+.skyline { margin: 0; color: var(--muted); font-size: 1.05em; letter-spacing: 0.04em; }
+.quote { margin: 0; font-family: var(--font-display); font-style: italic; font-size: 1.35em; line-height: 1.35; color: #f0dcc0; text-wrap: balance; }
 #dim { position: fixed; inset: 0; z-index: 2; background: #05040c; opacity: 0; pointer-events: none; transition: opacity 6s ease; }
-body.night #dim { opacity: 0.55; }
+body.night #dim { opacity: 0.32; }
 
 .stage {
   position: relative; z-index: 1;
@@ -51,12 +119,12 @@ body.night #dim { opacity: 0.55; }
 }
 .left { display: flex; flex-direction: column; justify-content: center; min-width: 0; gap: clamp(8px, 1vw, 20px); }
 .plaque { align-self: flex-start; margin: 0 0 clamp(6px, 1vw, 16px); padding: 0.45em 1.1em; font-family: var(--font-display); font-size: 0.95em; letter-spacing: 0.28em; text-transform: uppercase; color: #2a1a05; background: linear-gradient(135deg, #f0d58a, #c8922f 55%, #a8761f); border-radius: 6px; box-shadow: 0 2px 10px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.35); }
-.right .panel { border-color: rgba(217, 164, 65, 0.3); }
+.right .panel { border-color: rgba(217, 164, 65, 0.3); font-size: 1.3em; }
 .greeting { color: var(--muted); font-size: 1.35em; letter-spacing: 0.01em; margin: 0; }
 .clock {
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(5.5rem, 17vw, 22rem);
+  font-size: clamp(4rem, min(14vw, 24vh), 22rem);
   line-height: 0.9;
   letter-spacing: -0.02em;
   margin: 0;
@@ -64,7 +132,7 @@ body.night #dim { opacity: 0.55; }
   display: flex; align-items: baseline; gap: 0.12em; flex-wrap: wrap;
 }
 .clock .ampm { font-size: 0.2em; font-weight: 500; letter-spacing: 0.08em; color: var(--accent); text-transform: uppercase; }
-.date { font-family: var(--font-display); font-weight: 500; font-size: clamp(1.6rem, 3.4vw, 4.6rem); letter-spacing: -0.01em; margin: 0; text-wrap: balance; }
+.date { font-family: var(--font-display); font-weight: 500; font-size: clamp(1.4rem, min(3.4vw, 5vh), 4.6rem); letter-spacing: -0.01em; margin: 0; text-wrap: balance; }
 .sub { color: var(--muted); margin: 0; font-size: 1.15em; font-variant-numeric: tabular-nums; }
 
 .right { display: flex; flex-direction: column; gap: clamp(14px, 1.8vw, 36px); min-width: 0; justify-content: center; }
@@ -83,7 +151,7 @@ body.night #dim { opacity: 0.55; }
 }
 .panel h2 span { font-variant-numeric: tabular-nums; letter-spacing: 0.06em; }
 
-.tasks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.35em; }
+.tasks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.35em; max-height: 24vh; overflow: hidden; }
 .task { display: flex; align-items: center; gap: 0.8em; width: 100%; padding: 0.55em 0.4em; border: 0; background: none; color: var(--text); font: inherit; font-size: 1.2em; text-align: left; border-radius: 12px; cursor: pointer; }
 .task:hover, .task:focus-visible { background: rgba(255,255,255,0.07); outline: 2px solid var(--accent); outline-offset: 0; }
 .task:not(:focus-visible) { outline: none; }
@@ -112,32 +180,27 @@ body.night #dim { opacity: 0.55; }
 .apps-head { display: flex; justify-content: space-between; align-items: center; margin: 0 0 0.7em; color: var(--muted); font-size: 0.8em; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; }
 .apps-head button { font: inherit; font-size: 1em; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); background: none; border: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 .app-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5em, 1fr)); gap: 0.8em; }
-.app { position: relative; display: block; height: 8.6em; padding: 0; text-align: left; border-radius: 12px 12px 24px 24px; border: 1px solid rgba(246,236,220,0.26); background: linear-gradient(160deg, rgba(246,236,220,0.07), rgba(8,26,31,0.4)); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); color: var(--text); font: inherit; text-decoration: none; cursor: pointer; min-width: 0; overflow: hidden; isolation: isolate; box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 12px 26px rgba(0,0,0,0.35); transition: transform 0.6s ease, box-shadow 0.6s ease; }
-.app::before { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; background: linear-gradient(180deg, rgba(240,213,138,0.55) 0, transparent 5px), linear-gradient(90deg, rgba(66,130,235,0.2), transparent 28%); }
-.app .liq { position: absolute; left: 0; right: 0; bottom: 0; height: 26%; z-index: 1; background: linear-gradient(180deg, rgba(217,139,43,0.92), rgba(122,61,14,0.95)); transition: height 1.8s cubic-bezier(.3,.7,.2,1); }
-.app .liq::before { content: ""; position: absolute; left: 0; right: 0; top: -11px; height: 12px; background: var(--wave) repeat-x 0 0 / 80px 12px; animation: slosh 5s linear infinite; }
-.app .ice { position: absolute; left: 62%; bottom: 12%; z-index: 2; width: 2.3em; height: 2.3em; border-radius: 9px; border: 1px solid rgba(255,255,255,0.4); background: linear-gradient(135deg, rgba(255,255,255,0.5), rgba(255,255,255,0.06)); transform: rotate(12deg); transition: bottom 1.8s cubic-bezier(.3,.7,.2,1); }
-.app .liq::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(105deg, transparent 0 22px, rgba(255,214,150,0.22) 22px 38px, transparent 38px 66px); background-size: 132px 100%; animation: caustic 28s linear infinite; }
-.app .base { position: absolute; left: 0; right: 0; bottom: 0; height: 14px; z-index: 2; background: linear-gradient(180deg, #f0d58a, #c8922f 45%, #8f6418); box-shadow: inset 0 1px 0 rgba(255,255,255,0.45), 0 -2px 6px rgba(0,0,0,0.3); }
+.app { position: relative; display: block; height: 7.4em; padding: 0; text-align: left; border-radius: 16px; border: 1px solid rgba(246,236,220,0.26); background: linear-gradient(160deg, rgba(246,236,220,0.06), rgba(14,9,7,0.5)); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); color: var(--text); font: inherit; text-decoration: none; cursor: pointer; min-width: 0; overflow: hidden; isolation: isolate; box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 12px 26px rgba(0,0,0,0.35); transition: transform 0.6s ease, box-shadow 0.6s ease; }
+.app::before { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; background: linear-gradient(180deg, rgba(240,213,138,0.5) 0, transparent 4px); }
+.app .liq { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(90% 75% at 50% 125%, rgba(255,140,50,0.7), rgba(255,100,30,0.2) 45%, transparent 70%); opacity: 0.22; animation: flick 3.6s ease-in-out infinite alternate; transition: filter 0.9s ease; }
 .app .txt { position: absolute; left: 0.9em; right: 0.9em; top: 0.8em; z-index: 3; display: flex; flex-direction: column; gap: 0.2em; }
 .app .nm { font-family: var(--font-display); font-size: 1.15em; font-weight: 500; text-shadow: 0 1px 8px rgba(0,0,0,0.55); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .app .hint { font-size: 0.7em; font-weight: 400; color: var(--muted); line-height: 1.3; text-shadow: 0 1px 6px rgba(0,0,0,0.6); }
 .app:hover, .app:focus-visible { transform: translateY(-5px); box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 20px 38px rgba(0,0,0,0.45), 0 0 30px rgba(246,236,220,0.08); }
 .app:not(:focus-visible) { outline: none; }
 .app:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-.app:hover .liq, .app:focus-visible .liq { height: 66%; }
-.app:hover .ice, .app:focus-visible .ice { bottom: 40%; }
-.app:hover .liq::after, .app:focus-visible .liq::after { animation-duration: 12s; }
+.app:hover .liq, .app:focus-visible .liq { animation-duration: 1.8s; filter: brightness(1.9); }
 .app.removable { border-style: dashed; }
 .app.removable .nm::after { content: " \u00d7"; color: var(--accent); }
-@keyframes slosh { to { background-position-x: 80px; } }
-@keyframes caustic { to { background-position-x: 132px; } }
-@media (prefers-reduced-motion: reduce) { .app, .app .liq::after, .app .liq, .app .liq::before, .app .ice { animation: none !important; transition: none !important; } }
+@keyframes flick { 0% { opacity: 0.16; } 30% { opacity: 0.3; } 55% { opacity: 0.2; } 80% { opacity: 0.36; } 100% { opacity: 0.24; } }
+@media (prefers-reduced-motion: reduce) { .app, .app .liq { animation: none !important; transition: none !important; } }
 .app-form { display: flex; gap: 0.6em; margin-top: 0.8em; flex-wrap: wrap; }
 .app-form input { flex: 1 1 9em; min-width: 0; font: inherit; color: var(--text); background: rgba(255,255,255,0.06); border: 1px solid var(--faint); border-radius: 12px; padding: 0.55em 0.8em; }
 .app-form input::placeholder { color: var(--muted); }
 .app-form button { font: inherit; font-weight: 600; color: var(--ink); background: var(--accent); border: 0; border-radius: 12px; padding: 0.55em 1.1em; cursor: pointer; }
 .app-form input:focus-visible, .app-form button:focus-visible, .apps-head button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+@media (min-width: 861px) { html, body { overflow: hidden; } .stage { height: 100%; min-height: 0; } }
 
 @media (max-width: 860px) {
   .stage { grid-template-columns: minmax(0, 1fr); }
@@ -145,10 +208,16 @@ body.night #dim { opacity: 0.55; }
 }
 @media (prefers-reduced-motion: reduce) { .stage, #dim { transition: none; } }
 </style>
-
 </head>
 <body>
+
+
 <canvas id="ambient" aria-hidden="true"></canvas>
+<div id="velvet" aria-hidden="true"><i class="folds"></i><i class="sheen"></i><i class="grain"></i><i class="vig"></i></div>
+<div id="moon" aria-hidden="true"><i class="beam"></i></div>
+<div id="embers" aria-hidden="true"></div>
+<div id="candles" aria-hidden="true"><i class="pillar" style="right:4vw;width:2.6vw;height:6vw"><i class="flame" style="--w:0s"></i></i><i class="pillar" style="right:8.6vw;width:2.2vw;height:4.2vw"><i class="flame" style="--w:-0.7s"></i></i><i class="pillar" style="right:12.8vw;width:3vw;height:7.6vw"><i class="flame" style="--w:-1.4s"></i></i></div>
+<nav id="looks" aria-label="Choose a look"><button type="button" data-look="velvet">Velvet</button><button type="button" data-look="ember">Ember</button><button type="button" data-look="moon">Moon</button><button type="button" data-look="candle">Candle</button><button type="button" data-look="blue">Blue</button><button type="button" id="fireBtn" aria-pressed="false">Fire</button></nav>
 <div id="dim" aria-hidden="true"></div>
 
 <main class="stage" id="stage">
@@ -171,22 +240,13 @@ body.night #dim { opacity: 0.55; }
   </section>
 
   <section class="right">
-    <div class="panel" aria-labelledby="tasks-h">
-      <h2 id="tasks-h">Today <span id="count"></span></h2>
-      <ul class="tasks" id="tasks"></ul>
-      <p class="empty" id="empty" hidden>Nothing on the list. Add a task below, or from your phone.</p>
-      <form class="add" id="addForm" autocomplete="off">
-        <input id="newTask" type="text" maxlength="90" placeholder="Add a task" aria-label="New task">
-        <button type="submit">Add</button>
-      </form>
-      <p class="status" id="status"></p>
-      <button class="clear" id="clearDone" type="button" hidden>Clear finished</button>
-    </div>
-
     <div class="panel" aria-labelledby="cal-h">
       <h2 id="cal-h"><span id="monthName" style="letter-spacing:0.16em"></span><span id="yearNum"></span></h2>
       <div class="cal" id="cal"></div>
     </div>
+    <a class="strip" id="sound" href="https://music.amazon.com/search/dark%20jazz%20lounge" target="_blank" rel="noopener"><span class="k">Tonight's soundtrack</span><span class="v">Dark jazz lounge</span><span class="h">Say: Alexa, play dark jazz</span></a>
+    <p class="skyline" id="skyline"></p>
+    <p class="quote" id="quote"></p>
   </section>
 </main>
 
@@ -196,6 +256,41 @@ body.night #dim { opacity: 0.55; }
   var DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
   var MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
   var lastTime = "", lastDay = "", lastMonthKey = "";
+  var subBase = "", wxText = "";
+  function renderSub() { $("sub").textContent = subBase + (wxText ? " \u00b7 " + wxText : ""); }
+  var QUOTES = ["Low light, slow music, nowhere to be.", "Let the night take its time.", "Velvet, brass and a little bit of fire.", "Stay a while. The room is yours.", "Everything good happens a little after dark.", "Pour something slow. Let the horns play.", "Soft light, deep breath, long evening.", "The night is young and so are we.", "Linger. There is no hurry in here.", "Warm hands, warm room, quiet mind.", "Some evenings are meant to be savored.", "Turn it low and let it glow.", "Here, the world can wait.", "Dim the day. Light the room."];
+  function renderQuote(doy) { $("quote").textContent = "\u201c" + QUOTES[doy % QUOTES.length] + "\u201d"; }
+  function moonName(d) {
+    var days = ((d.getTime() - Date.UTC(2000, 0, 6, 18, 14)) / 86400000) % 29.530588; if (days < 0) days += 29.530588;
+    var f = days / 29.530588;
+    return f < 0.03 || f > 0.97 ? "New moon" : f < 0.22 ? "Waxing crescent" : f < 0.28 ? "First quarter" : f < 0.47 ? "Waxing gibbous" : f < 0.53 ? "Full moon" : f < 0.72 ? "Waning gibbous" : f < 0.78 ? "Last quarter" : "Waning crescent";
+  }
+  function sunsetText(d) {
+    var R = Math.PI / 180, lat = 42.33, lon = -83.05;
+    var N = Math.floor((new Date(d.getFullYear(), d.getMonth(), d.getDate()) - new Date(d.getFullYear(), 0, 0)) / 86400000);
+    var lh = lon / 15, t = N + (18 - lh) / 24, M = 0.9856 * t - 3.289;
+    var L = (M + 1.916 * Math.sin(M * R) + 0.02 * Math.sin(2 * M * R) + 282.634) % 360; if (L < 0) L += 360;
+    var RA = Math.atan(0.91764 * Math.tan(L * R)) / R; RA = (RA + 360) % 360;
+    RA += Math.floor(L / 90) * 90 - Math.floor(RA / 90) * 90; RA /= 15;
+    var sd = 0.39782 * Math.sin(L * R), cd = Math.cos(Math.asin(sd));
+    var ch = (Math.cos(90.833 * R) - sd * Math.sin(lat * R)) / (cd * Math.cos(lat * R));
+    if (ch > 1 || ch < -1) return "";
+    var H = Math.acos(ch) / R / 15, T = H + RA - 0.06571 * t - 6.622;
+    var ut = ((T - lh) % 24 + 24) % 24, loc = ((ut - d.getTimezoneOffset() / 60) % 24 + 24) % 24;
+    var hh = Math.floor(loc), mm = Math.round((loc - hh) * 60); if (mm === 60) { mm = 0; hh++; }
+    return "Sunset " + ((hh % 12) || 12) + ":" + (mm < 10 ? "0" : "") + mm + " " + (hh % 24 < 12 ? "am" : "pm");
+  }
+  function renderSky(d) { $("skyline").textContent = [moonName(d), sunsetText(d)].filter(Boolean).join(" \u00b7 "); }
+  var WX = { 0: "Clear", 1: "Mostly clear", 2: "Partly cloudy", 3: "Cloudy", 45: "Foggy", 48: "Foggy", 51: "Drizzle", 53: "Drizzle", 55: "Drizzle", 61: "Rain", 63: "Rain", 65: "Heavy rain", 71: "Snow", 73: "Snow", 75: "Heavy snow", 77: "Snow", 80: "Showers", 81: "Showers", 82: "Heavy showers", 85: "Snow showers", 86: "Snow showers", 95: "Thunderstorms", 96: "Thunderstorms", 99: "Thunderstorms" };
+  function loadWeather() {
+    try {
+      fetch("https://api.open-meteo.com/v1/forecast?latitude=42.33&longitude=-83.05&current=temperature_2m,weather_code&temperature_unit=fahrenheit")
+        .then(function (r) { return r.json(); })
+        .then(function (j) { var c = j.current; wxText = Math.round(c.temperature_2m) + "\u00b0 " + (WX[c.weather_code] || ""); renderSub(); })
+        .catch(function () {});
+    } catch (e) {}
+  }
+  loadWeather(); setInterval(loadWeather, 1800000);
 
   /* Clock, date, greeting, month grid */
   function tick() {
@@ -218,7 +313,7 @@ body.night #dim { opacity: 0.55; }
       var doy = Math.floor((new Date(now.getFullYear(), now.getMonth(), now.getDate()) - start) / 86400000) + 1;
       var jan1 = start.getDay();
       var week = Math.ceil((doy + jan1) / 7);
-      $("sub").textContent = "Week " + week + " · Day " + doy;
+      subBase = "Week " + week + " · Day " + doy; renderSub(); renderSky(now); renderQuote(doy);
       buildMonth(now);
     }
   }
@@ -236,83 +331,6 @@ body.night #dim { opacity: 0.55; }
   }
   tick();
   setInterval(tick, 1000);
-
-  /* Task list: shared through db when available, local otherwise */
-  var items = [];
-  var store = null;      // db document ref
-  var localOnly = true;
-  var pending = Promise.resolve();
-  function lsGet() { try { return JSON.parse(localStorage.getItem("lrb-tasks") || "[]"); } catch (e) { return []; } }
-  function lsSet(v) { try { localStorage.setItem("lrb-tasks", JSON.stringify(v)); } catch (e) {} }
-
-  function render() {
-    var list = $("tasks");
-    list.innerHTML = "";
-    var sorted = items.slice().sort(function (a, b) { return (a.done ? 1 : 0) - (b.done ? 1 : 0); });
-    sorted.forEach(function (it) {
-      var li = document.createElement("li");
-      var b = document.createElement("button");
-      b.type = "button";
-      b.className = "task" + (it.done ? " done" : "");
-      b.setAttribute("role", "checkbox");
-      b.setAttribute("aria-checked", it.done ? "true" : "false");
-      var box = document.createElement("span"); box.className = "box";
-      var lab = document.createElement("span"); lab.className = "label"; lab.textContent = it.text;
-      b.appendChild(box); b.appendChild(lab);
-      b.addEventListener("click", function () { it.done = !it.done; commit(); });
-      li.appendChild(b);
-      list.appendChild(li);
-    });
-    var open = items.filter(function (i) { return !i.done; }).length;
-    $("count").textContent = items.length ? open + " open" : "";
-    $("empty").hidden = items.length > 0;
-    $("clearDone").hidden = !items.some(function (i) { return i.done; });
-  }
-  function commit() {
-    render();
-    var snapshot = items.map(function (i) { return { id: i.id, text: i.text, done: !!i.done }; });
-    lsSet(snapshot);
-    if (store) {
-      pending = pending.then(function () { return store.set({ items: snapshot }); })
-        .catch(function () { $("status").textContent = "Could not sync. Changes are saved on this screen only."; });
-    }
-  }
-  $("addForm").addEventListener("submit", function (e) {
-    e.preventDefault();
-    var v = $("newTask").value.trim();
-    if (!v) return;
-    items.push({ id: "t" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), text: v, done: false });
-    $("newTask").value = "";
-    commit();
-  });
-  $("clearDone").addEventListener("click", function () {
-    items = items.filter(function (i) { return !i.done; });
-    commit();
-  });
-
-  items = lsGet();
-  render();
-
-  try {
-    if (window.claude && window.claude.use) {
-      window.claude.use("db").then(function (db) {
-        if (!db) { $("status").textContent = "Tasks are saved on this screen only."; return; }
-        store = db.doc("tv/todos");
-        localOnly = false;
-        var timer = setTimeout(function () { $("status").textContent = "Syncing is slow. Showing the last saved list."; }, 10000);
-        store.onSnapshot(function (snap) {
-          if (!snap.metadata.fromCache) { clearTimeout(timer); $("status").textContent = ""; }
-          if (snap.metadata.hasPendingWrites) return;
-          var d = snap.exists ? snap.data() : null;
-          if (d && Array.isArray(d.items)) { items = d.items; lsSet(items); render(); }
-        }, function () {
-          clearTimeout(timer);
-          store = null;
-          $("status").textContent = "Tasks are saved on this screen only.";
-        });
-      }).catch(function () {});
-    }
-  } catch (e) {}
 
   /* Key apps: tiles that open in a new tab. Shared through db, local otherwise */
   var DEFAULT_APPS = [
@@ -367,9 +385,7 @@ body.night #dim { opacity: 0.55; }
         el.target = "_blank";
         el.rel = "noopener noreferrer";
       }
-      var base = document.createElement("span"); base.className = "base"; base.setAttribute("aria-hidden", "true");
-      var ice = document.createElement("span"); ice.className = "ice"; ice.setAttribute("aria-hidden", "true");
-      var liq = document.createElement("span"); liq.className = "liq"; liq.setAttribute("aria-hidden", "true");
+                  var liq = document.createElement("span"); liq.className = "liq"; liq.setAttribute("aria-hidden", "true");
       var txt = document.createElement("span"); txt.className = "txt";
       var nm = document.createElement("span");
       nm.className = "nm";
@@ -381,7 +397,7 @@ body.night #dim { opacity: 0.55; }
         hint.textContent = "Alexa, open " + a.name;
         txt.appendChild(hint);
       }
-      el.appendChild(ice); el.appendChild(liq); el.appendChild(base); el.appendChild(txt);
+      el.appendChild(liq); el.appendChild(txt);
       grid.appendChild(el);
     });
     $("appForm").hidden = !editingApps;
@@ -432,6 +448,20 @@ body.night #dim { opacity: 0.55; }
     }, 90000);
   }
 
+  /* Dust floating in the moonlight */
+  (function () {
+    var host = $("moon");
+    for (var i = 0; i < 14; i++) {
+      var m = document.createElement("i");
+      m.className = "mote";
+      m.style.left = (55 + Math.random() * 38).toFixed(1) + "%";
+      m.style.top = (8 + Math.random() * 62).toFixed(1) + "%";
+      m.style.setProperty("--d", (8 + Math.random() * 7).toFixed(1) + "s");
+      m.style.setProperty("--w", "-" + (Math.random() * 14).toFixed(1) + "s");
+      host.appendChild(m);
+    }
+  })();
+
   /* Ambient light: a few soft colour fields drifting on a low-resolution canvas */
   var cv = $("ambient"), ctx = cv.getContext("2d");
   var W = 0, H = 0, SCALE = 0.25;
@@ -442,24 +472,58 @@ body.night #dim { opacity: 0.55; }
   }
   size();
   window.addEventListener("resize", size);
-  var blobs = [
-    { rgb: [24, 132, 130], a: 0.5, r: 0.58, fx: 0.00011, fy: 0.00008, px: 0.0, py: 1.2 },
-    { rgb: [183, 86, 48], a: 0.3, r: 0.5, fx: 0.00008, fy: 0.00012, px: 2.1, py: 0.4 },
-    { rgb: [66, 130, 235], a: 0.34, r: 0.5, fx: 0.00007, fy: 0.00009, px: 4.0, py: 2.6, fl: 0.3 },
-    { rgb: [236, 160, 66], a: 0.3, r: 0.36, fx: 0.00013, fy: 0.00006, px: 5.2, py: 3.3, fl: 0.3 }
-  ];
+  var LOOKS = {
+    velvet: { bg: "#0b0806", blobs: [
+      { rgb: [110, 22, 40], a: 0.3, r: 0.7, fx: 0.00004, fy: 0.00006, px: 0.6, py: 1.2, by: 0.7, ay: 0.12 },
+      { rgb: [255, 85, 25], a: 0.5, r: 0.6, fx: 0.00005, fy: 0.00011, px: 2.1, py: 0.4, by: 1.0, ay: 0.05, fl: 0.4 },
+      { rgb: [120, 150, 235], a: 0.1, r: 0.55, fx: 0.00003, fy: 0.00005, px: 4.0, py: 2.6, by: 0.05, ay: 0.06 },
+      { rgb: [236, 140, 60], a: 0.3, r: 0.4, fx: 0.00009, fy: 0.00007, px: 5.2, py: 3.3, by: 1.02, ay: 0.04, fl: 0.5 } ] },
+    ember: { bg: "#0b0705", blobs: [
+      { rgb: [90, 18, 12], a: 0.3, r: 0.8, fx: 0.00004, fy: 0.00006, px: 0.6, py: 1.2, by: 0.8, ay: 0.1 },
+      { rgb: [255, 80, 20], a: 0.68, r: 0.75, fx: 0.00004, fy: 0.00011, px: 2.1, py: 0.4, bx: 0.5, ax: 0.18, by: 1.08, ay: 0.05, fl: 0.4 },
+      { rgb: [255, 140, 50], a: 0.4, r: 0.5, fx: 0.00007, fy: 0.00009, px: 5.2, py: 3.3, bx: 0.3, ax: 0.2, by: 1.05, ay: 0.04, fl: 0.5 } ] },
+    moon: { bg: "#06070b", blobs: [
+      { rgb: [120, 150, 235], a: 0.2, r: 0.7, fx: 0.00003, fy: 0.00005, px: 4.0, py: 2.6, bx: 0.85, ax: 0.04, by: 0.05, ay: 0.05 },
+      { rgb: [40, 60, 120], a: 0.2, r: 0.8, fx: 0.00004, fy: 0.00006, px: 1.0, py: 0.6, bx: 0.3, ax: 0.1, by: 0.6, ay: 0.1 },
+      { rgb: [255, 150, 60], a: 0.1, r: 0.4, fx: 0.00005, fy: 0.00009, px: 3.0, py: 1.0, bx: 0.2, ax: 0.1, by: 1.05, ay: 0.04, fl: 0.4 } ] },
+    candle: { bg: "#0b0807", blobs: [
+      { rgb: [255, 160, 60], a: 0.42, r: 0.65, fx: 0.00004, fy: 0.0001, px: 1.0, py: 0.5, bx: 0.85, ax: 0.03, by: 0.82, ay: 0.04, fl: 0.45 },
+      { rgb: [200, 100, 40], a: 0.22, r: 0.8, fx: 0.00003, fy: 0.00006, px: 2.0, py: 1.5, bx: 0.6, ax: 0.1, by: 0.7, ay: 0.1 },
+      { rgb: [90, 25, 20], a: 0.2, r: 0.7, fx: 0.00004, fy: 0.00005, px: 4.0, py: 2.0, bx: 0.2, ax: 0.1, by: 0.4, ay: 0.1 } ] },
+    blue: { bg: "#06070d", blobs: [
+      { rgb: [70, 130, 240], a: 0.62, r: 0.65, fx: 0.00004, fy: 0.00009, px: 0.5, py: 0.4, bx: 0.3, ax: 0.18, by: 1.1, ay: 0.05, fl: 0.35 },
+      { rgb: [130, 90, 230], a: 0.45, r: 0.55, fx: 0.00005, fy: 0.00007, px: 2.6, py: 1.8, bx: 0.72, ax: 0.16, by: 1.1, ay: 0.05, fl: 0.4 },
+      { rgb: [255, 150, 60], a: 0.2, r: 0.35, fx: 0.00006, fy: 0.00008, px: 4.0, py: 3.0, bx: 0.5, ax: 0.1, by: 1.08, ay: 0.03, fl: 0.5 } ] }
+  };
+  var lookName = "velvet";
+  function setLook(n, save) {
+    if (!LOOKS[n]) n = "velvet";
+    lookName = n; document.body.setAttribute("data-look", n);
+    var bs = document.querySelectorAll("#looks button[data-look]");
+    for (var i = 0; i < bs.length; i++) bs[i].setAttribute("aria-pressed", bs[i].getAttribute("data-look") === n ? "true" : "false");
+    if (save) { try { localStorage.setItem("lrb-look", n); } catch (e) {} }
+    draw(performance.now());
+  }
+  var fire = false;
+  $("fireBtn").addEventListener("click", function () { fire = !fire; document.body.classList.toggle("fire", fire); this.setAttribute("aria-pressed", fire ? "true" : "false"); });
+  document.querySelectorAll("#looks button[data-look]").forEach(function (b) { b.addEventListener("click", function () { setLook(b.getAttribute("data-look"), true); }); });
+  (function () {
+    var e = $("embers"), html = "";
+    for (var i = 0; i < 18; i++) html += '<i class="ember" style="left:' + (6 + Math.random() * 88).toFixed(1) + '%;--dx:' + ((Math.random() - 0.5) * 8).toFixed(1) + 'vw;--d:' + (6 + Math.random() * 6).toFixed(1) + 's;--w:-' + (Math.random() * 12).toFixed(1) + 's"></i>';
+    e.innerHTML = html;
+  })();
   function draw(t) {
     ctx.globalCompositeOperation = "source-over";
-    ctx.fillStyle = "#0a1d22";
+    ctx.fillStyle = LOOKS[lookName].bg;
     ctx.fillRect(0, 0, W, H);
     ctx.globalCompositeOperation = "lighter";
     var m = Math.max(W, H);
-    blobs.forEach(function (b) {
-      var x = W * (0.5 + 0.42 * Math.sin(t * b.fx * 6.283 + b.px));
-      var y = H * (0.5 + 0.42 * Math.sin(t * b.fy * 6.283 + b.py));
+    LOOKS[lookName].blobs.forEach(function (b) {
+      var x = W * (b.bx !== undefined ? b.bx + b.ax * Math.sin(t * b.fx * 6.283 + b.px) : 0.5 + 0.42 * Math.sin(t * b.fx * 6.283 + b.px));
+      var y = H * (b.by !== undefined ? b.by + b.ay * Math.sin(t * b.fy * 6.283 + b.py) : 0.5 + 0.42 * Math.sin(t * b.fy * 6.283 + b.py));
       var r = m * b.r;
       var g = ctx.createRadialGradient(x, y, 0, x, y, r);
-      g.addColorStop(0, "rgba(" + b.rgb.join(",") + "," + (b.a * (b.fl ? 1 + b.fl * Math.sin(t * 0.007 + b.px * 5) * Math.sin(t * 0.0031 + b.py) : 1)).toFixed(3) + ")");
+      g.addColorStop(0, "rgba(" + b.rgb.join(",") + "," + ((b.a * (fire && b.fl ? 1.5 : 1)) * (b.fl ? 1 + b.fl * Math.sin(t * 0.007 + b.px * 5) * Math.sin(t * 0.0031 + b.py) : 1)).toFixed(3) + ")");
       g.addColorStop(1, "rgba(" + b.rgb.join(",") + ",0)");
       ctx.fillStyle = g;
       ctx.fillRect(0, 0, W, H);
@@ -470,7 +534,10 @@ body.night #dim { opacity: 0.55; }
     if (ts - last > 66) { last = ts; draw(ts); }
     requestAnimationFrame(frame);
   }
-  draw(0);
+  var saved = "";
+  try { saved = localStorage.getItem("lrb-look") || ""; } catch (e) {}
+  var q = /[?&]look=(\w+)/.exec(location.search);
+  setLook(q ? q[1] : saved || "velvet", false);
   if (!reduce) requestAnimationFrame(frame);
 })();
 </script>
