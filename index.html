@@ -203,6 +203,8 @@ body.night #dim { opacity: 0.32; }
 @media (min-width: 861px) { html, body { overflow: hidden; } .stage { height: 100%; min-height: 0; } }
 
 @media (max-width: 860px) {
+  .right .panel { font-size: 1em; }
+  .stage { width: 100%; max-width: 100%; }
   .stage { grid-template-columns: minmax(0, 1fr); }
   .clock { font-size: clamp(4.5rem, 24vw, 9rem); }
 }
@@ -542,5 +544,27 @@ body.night #dim { opacity: 0.32; }
 })();
 </script>
 
+<script>
+/* Fit to screen: if the page is taller than the visible area (a browser bar on a TV, say), shrink it until everything shows */
+(function () {
+  var stage = document.getElementById("stage");
+  function fit() {
+    stage.style.zoom = ""; stage.style.width = ""; stage.style.height = "";
+    if (window.innerWidth < 861) return;
+    var need = 0;
+    var kids = stage.children;
+    for (var i = 0; i < kids.length; i++) need = Math.max(need, kids[i].scrollHeight);
+    var have = stage.clientHeight;
+    if (!need || !have || need <= have) return;
+    var z = Math.max(0.55, (have / need) * 0.97);
+    stage.style.zoom = z.toFixed(3);
+  }
+  var t;
+  window.addEventListener("resize", function () { clearTimeout(t); t = setTimeout(fit, 150); });
+  window.addEventListener("load", function () { fit(); setTimeout(fit, 1500); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+  fit();
+})();
+</script>
 </body>
 </html>
