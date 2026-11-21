@@ -210,6 +210,26 @@ body.night #dim { opacity: 0.32; }
 }
 @media (prefers-reduced-motion: reduce) { .stage, #dim { transition: none; } }
 .quote.holiday { font-size: 1.7em; color: #f6dfb0; }
+
+.wx .wxnow { display: flex; align-items: baseline; gap: 0.7em; margin-bottom: 0.5em; }
+.wx .temp { font-family: var(--font-display); font-size: 3.2em; line-height: 1; }
+.wx .cond { color: var(--muted); font-size: 1.1em; }
+.fc { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6em; margin-bottom: 0.8em; }
+.fc div { display: flex; flex-direction: column; gap: 0.1em; padding: 0.5em 0.7em; border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(246,236,220,0.1); }
+.fc .d { font-size: 0.7em; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+.fc .t { font-family: var(--font-display); font-size: 1.15em; }
+.fc .c { font-size: 0.72em; color: var(--muted); }
+.sky { display: flex; align-items: center; gap: 0.9em; }
+.sky svg { width: 2.6em; height: 2.6em; flex: none; filter: drop-shadow(0 0 8px rgba(215,225,255,0.35)); }
+.skytxt { display: flex; flex-direction: column; font-size: 0.95em; line-height: 1.35; }
+.skytxt span:last-child { color: var(--muted); font-size: 0.9em; }
+.sgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6em; }
+.sd { display: flex; flex-direction: column; gap: 0.15em; padding: 0.7em 0.9em; border-radius: 12px; color: var(--text); text-decoration: none; background: rgba(255,255,255,0.04); border: 1px solid rgba(217,164,65,0.3); }
+.sd:hover, .sd:focus-visible { border-color: rgba(217,164,65,0.85); background: rgba(217,164,65,0.1); }
+.sd:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sd .nm { font-family: var(--font-display); font-size: 1.1em; }
+.sd .hint { font-size: 0.7em; color: var(--muted); }
+.right .panel { font-size: 1em; }
 </style>
 </head>
 <body>
@@ -243,12 +263,16 @@ body.night #dim { opacity: 0.32; }
   </section>
 
   <section class="right">
-    <div class="panel" aria-labelledby="cal-h">
-      <h2 id="cal-h"><span id="monthName" style="letter-spacing:0.16em"></span><span id="yearNum"></span></h2>
-      <div class="cal" id="cal"></div>
+    <div class="panel wx" aria-labelledby="wx-h">
+      <h2 id="wx-h"><span>Weather and sky</span><span>Detroit</span></h2>
+      <div class="wxnow"><span class="temp" id="wxTemp">--</span><span class="cond" id="wxCond"></span></div>
+      <div class="fc" id="fc"></div>
+      <div class="sky"><svg id="moonSvg" viewBox="-24 -24 48 48" aria-hidden="true"></svg><div class="skytxt"><span id="moonName"></span><span id="sunTxt"></span></div></div>
     </div>
-    <a class="strip" id="sound" href="https://music.amazon.com/search/dark%20jazz%20lounge" target="_blank" rel="noopener"><span class="k">Tonight's soundtrack</span><span class="v">Dark jazz lounge</span><span class="h">Say: Alexa, play dark jazz</span></a>
-    <p class="skyline" id="skyline"></p>
+    <div class="panel snd" aria-labelledby="snd-h">
+      <h2 id="snd-h"><span>Soundtrack</span><span>Amazon Music</span></h2>
+      <div class="sgrid"><a class="sd" href="https://music.amazon.com/search/dark%20jazz%20lounge" target="_blank" rel="noopener"><span class="nm">Dark Jazz Lounge</span><span class="hint">Alexa, play dark jazz</span></a><a class="sd" href="https://music.amazon.com/search/oud%20chill" target="_blank" rel="noopener"><span class="nm">Oud and Chill</span><span class="hint">Alexa, play oud music</span></a><a class="sd" href="https://music.amazon.com/search/chill%20hip%20hop" target="_blank" rel="noopener"><span class="nm">Hip Hop Chill</span><span class="hint">Alexa, play chill hip hop</span></a><a class="sd" href="https://music.amazon.com/search/late%20night%20soul" target="_blank" rel="noopener"><span class="nm">Late Night Soul</span><span class="hint">Alexa, play late night soul</span></a><a class="sd" href="https://music.amazon.com/search/candlelight%20piano" target="_blank" rel="noopener"><span class="nm">Candlelight Piano</span><span class="hint">Alexa, play piano</span></a><a class="sd" href="https://music.amazon.com/search/slow%20jams" target="_blank" rel="noopener"><span class="nm">Slow Jams</span><span class="hint">Alexa, play slow jams</span></a></div>
+    </div>
     <p class="quote" id="quote"></p>
   </section>
 </main>
@@ -292,13 +316,31 @@ body.night #dim { opacity: 0.32; }
     var hh = Math.floor(loc), mm = Math.round((loc - hh) * 60); if (mm === 60) { mm = 0; hh++; }
     return "Sunset " + ((hh % 12) || 12) + ":" + (mm < 10 ? "0" : "") + mm + " " + (hh % 24 < 12 ? "am" : "pm");
   }
-  function renderSky(d) { $("skyline").textContent = [moonName(d), sunsetText(d)].filter(Boolean).join(" \u00b7 "); }
+  function moonSvg(d) {
+    var days = ((d.getTime() - Date.UTC(2000, 0, 6, 18, 14)) / 86400000) % 29.530588; if (days < 0) days += 29.530588;
+    var f = days / 29.530588, waning = f > 0.5, g = waning ? 1 - f : f;
+    var k = Math.cos(2 * Math.PI * g), rx = Math.abs(k) * 20;
+    var lit = "M0,-20 A20,20 0 0 1 0,20 A" + rx.toFixed(2) + ",20 0 0 " + (k > 0 ? 0 : 1) + " 0,-20 Z";
+    $("moonSvg").innerHTML = '<circle r="20" fill="#1b1d2a" stroke="rgba(215,225,255,0.25)" stroke-width="0.6"/><path d="' + lit + '" fill="#e9eefc"' + (waning ? ' transform="scale(-1,1)"' : '') + '/>';
+  }
+  function renderSky(d) { $("moonName").textContent = moonName(d); $("sunTxt").textContent = sunsetText(d); moonSvg(d); }
   var WX = { 0: "Clear", 1: "Mostly clear", 2: "Partly cloudy", 3: "Cloudy", 45: "Foggy", 48: "Foggy", 51: "Drizzle", 53: "Drizzle", 55: "Drizzle", 61: "Rain", 63: "Rain", 65: "Heavy rain", 71: "Snow", 73: "Snow", 75: "Heavy snow", 77: "Snow", 80: "Showers", 81: "Showers", 82: "Heavy showers", 85: "Snow showers", 86: "Snow showers", 95: "Thunderstorms", 96: "Thunderstorms", 99: "Thunderstorms" };
   function loadWeather() {
     try {
-      fetch("https://api.open-meteo.com/v1/forecast?latitude=42.33&longitude=-83.05&current=temperature_2m,weather_code&temperature_unit=fahrenheit")
+      fetch("https://api.open-meteo.com/v1/forecast?latitude=42.33&longitude=-83.05&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&temperature_unit=fahrenheit&timezone=auto&forecast_days=3")
         .then(function (r) { return r.json(); })
-        .then(function (j) { var c = j.current; wxText = Math.round(c.temperature_2m) + "\u00b0 " + (WX[c.weather_code] || ""); renderSub(); })
+        .then(function (j) {
+          var c = j.current;
+          wxText = Math.round(c.temperature_2m) + "\u00b0 " + (WX[c.weather_code] || ""); renderSub();
+          $("wxTemp").textContent = Math.round(c.temperature_2m) + "\u00b0";
+          $("wxCond").textContent = WX[c.weather_code] || "";
+          var dd = j.daily, html = "";
+          for (var i = 0; i < dd.time.length; i++) {
+            var dt = new Date(dd.time[i] + "T12:00:00");
+            html += '<div><span class="d">' + (i === 0 ? "Today" : DAYS[dt.getDay()].slice(0, 3)) + '</span><span class="t">' + Math.round(dd.temperature_2m_max[i]) + "\u00b0 / " + Math.round(dd.temperature_2m_min[i]) + '\u00b0</span><span class="c">' + (WX[dd.weather_code[i]] || "") + "</span></div>";
+          }
+          $("fc").innerHTML = html;
+        })
         .catch(function () {});
     } catch (e) {}
   }
@@ -330,6 +372,7 @@ body.night #dim { opacity: 0.32; }
     }
   }
   function buildMonth(now) {
+    if (!$("cal")) return;
     var y = now.getFullYear(), mo = now.getMonth();
     $("monthName").textContent = MONTHS[mo].toUpperCase();
     $("yearNum").textContent = y;
